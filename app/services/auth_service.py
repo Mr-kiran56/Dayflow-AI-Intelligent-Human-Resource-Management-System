@@ -36,7 +36,7 @@ class AuthService:
 
         auth_user_id = uuid.uuid4()
 
-        # Handle account profile creation directly in PostgreSQL database to prevent Supabase default email bounce-backs
+        # Handle account profile creation directly in PostgreSQL database (Default to verified for seamless hackathon demo)
         profile = Profile(
             auth_user_id=auth_user_id,
             employee_id=req.employee_id,
@@ -47,7 +47,7 @@ class AuthService:
             department_id=req.department_id,
             job_title=req.job_title,
             is_active=True,
-            is_email_verified=False,
+            is_email_verified=True,
         )
         db.add(profile)
         await db.flush()
@@ -81,15 +81,6 @@ class AuthService:
         await db.commit()
         await db.refresh(profile)
 
-        # Dispatch live outbound email via EmailService (if custom SMTP is set in .env)
-        origin = settings.CORS_ORIGINS[0] if isinstance(settings.CORS_ORIGINS, list) and settings.CORS_ORIGINS else "http://localhost:5173"
-        verify_url = f"{origin}/login?verify_email={profile.email}"
-        await EmailService.send_verification_email(
-            to_email=profile.email,
-            full_name=profile.full_name,
-            verify_url=verify_url,
-        )
-
         token = create_access_token(
             data={
                 "sub": str(profile.auth_user_id),
@@ -114,9 +105,6 @@ class AuthService:
 
         if not profile.is_active:
             raise AuthInvalidCredentialsException("Account is disabled")
-
-        if not profile.is_email_verified:
-            raise AuthInvalidCredentialsException("Email not verified. Please check your inbox and verify your email before logging in.")
 
         token = create_access_token(
             data={

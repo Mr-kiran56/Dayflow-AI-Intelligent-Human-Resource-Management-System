@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { authService } from '../services/authService';
-import { Role } from '../types';
-import { User, Mail, Lock, BadgeCheck, ArrowRight, Shield, CheckCircle2, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, BadgeCheck, ArrowRight, Shield, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { BrandLogo } from '../components/ui/BrandLogo';
 
 export const Signup: React.FC = () => {
@@ -15,14 +13,12 @@ export const Signup: React.FC = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
   const [showChecklistPopover, setShowChecklistPopover] = useState(false);
 
   const { signup, loading } = useAuth();
   const navigate = useNavigate();
 
-  const isBusy = loading || isSubmitting || isVerifying;
+  const isBusy = loading || isSubmitting;
 
   // Lock body & html background to slate-950 dark to eliminate over-scroll white space gaps
   useEffect(() => {
@@ -71,25 +67,14 @@ export const Signup: React.FC = () => {
         role: 'EMPLOYEE',
         job_title: jobTitle || undefined,
       });
-      setVerificationModalOpen(true);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleVerifyEmail = async () => {
-    setIsVerifying(true);
-    try {
-      await authService.verifyEmail(email);
-      setVerificationModalOpen(false);
+      
+      // Directly redirect to sign in with immediate access
       navigate('/login', {
-        state: { info: `Email successfully verified for ${email}. You can now sign in!` },
+        state: { info: `Account successfully created for ${email}! You can now sign in immediately.` },
       });
     } catch (err: any) {
-      setError(err.message || 'Verification failed');
-      setIsVerifying(false);
+      setError(err.message || 'Failed to create account');
+      setIsSubmitting(false);
     }
   };
 
@@ -298,68 +283,6 @@ export const Signup: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Verification Notice Modal */}
-      {verificationModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-floating border border-slate-200 text-slate-900 space-y-4 animate-in fade-in zoom-in-95">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#1a73e8] mx-auto">
-              <Mail className="w-6 h-6" />
-            </div>
-
-            <div className="text-center space-y-1">
-              <h3 className="text-lg font-bold text-slate-900">Email Verification Sent</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                An activation link has been sent to <span className="font-bold text-[#1a73e8]">{email}</span>. You must verify your email before sign in is permitted.
-              </p>
-            </div>
-
-            <div className="p-3.5 bg-blue-50 border border-blue-200/80 rounded-2xl text-xs text-blue-900 space-y-1.5">
-              <div className="flex items-center gap-2 font-bold text-blue-950">
-                <CheckCircle2 className="w-4 h-4 text-[#34A853] shrink-0" />
-                <span>Evaluation & Test Verification Link</span>
-              </div>
-              <p className="text-[11px] text-blue-800 leading-relaxed">
-                If custom SMTP credentials (e.g. SendGrid/Resend) are not configured in your local environment, use the instant verification link below to verify your account in 1 click.
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-1">
-              <button
-                type="button"
-                disabled={isVerifying}
-                onClick={handleVerifyEmail}
-                className="w-full py-3 bg-[#34A853] hover:bg-[#2d9247] text-white font-bold text-xs rounded-full transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
-              >
-                {isVerifying ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                    <span>Verifying & Activating Account...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>📩 Verify Email & Activate Account Now</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setVerificationModalOpen(false);
-                  navigate('/login', {
-                    state: { info: `Registration complete for ${email}. Please check your email inbox or click verification link before logging in.` },
-                  });
-                }}
-                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-full transition-all flex items-center justify-center gap-1.5"
-              >
-                <span>Return to Sign In</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
