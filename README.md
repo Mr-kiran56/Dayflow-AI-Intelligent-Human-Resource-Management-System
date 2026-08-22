@@ -4,7 +4,32 @@ DayFlow AI is a full-stack, asynchronous Human Resource Management System (HRMS)
 
 ---
 
-## Architectural Topology
+## Primary System Architecture Diagram
+
+```
+                      +----------------------------------+
+                      |         React Frontend           |
+                      |   (TypeScript / Vite App)        |
+                      +----------------------------------+
+                                       |
+                                       | HTTP / REST API (JSON)
+                                       v
+                      +----------------------------------+
+                      |          FastAPI Server          |
+                      |    (Async Request Pipeline)      |
+                      +----------------------------------+
+                           /           |            \
+                          /            |             \
+                         v             v              v
+        +-------------------+  +---------------+  +------------------+
+        |  PostgreSQL / DB  |  |  JWT Security |  | Google Gemini AI |
+        |  (AsyncSQLAlchemy)|  | (RBAC Middleware)| (Policy RAG)     |
+        +-------------------+  +---------------+  +------------------+
+```
+
+---
+
+## High-Level Component Topology (Mermaid)
 
 ```mermaid
 graph TD
@@ -90,7 +115,7 @@ sequenceDiagram
 ## Key Functional Capabilities
 
 ### 1. Identity & Security Architecture
-- Role-Based Access Control (RBAC): Strict isolation separating `EMPLOYEE` self-service privileges from `ADMIN`/`HR` managerial capabilities.
+- Role-Based Access Control (RBAC): Strict route isolation separating `EMPLOYEE` self-service privileges from `ADMIN`/`HR` managerial capabilities.
 - Security Policy Checklist: Real-time dynamic password validation verifying 8+ characters, uppercase letters, numbers, and special symbols.
 - Email Verification Enforcer: Ensures user profiles maintain verification flags before system access.
 

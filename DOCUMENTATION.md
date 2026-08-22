@@ -47,7 +47,30 @@ DayFlow AI is an enterprise-grade, event-driven Human Resource Management System
 
 ## 3. Architectural Blueprint and System Flows
 
-### 3.1 High-Level Component Topology
+### 3.1 Primary System Architecture Diagram
+
+```
+                      +----------------------------------+
+                      |         React Frontend           |
+                      |   (TypeScript / Vite App)        |
+                      +----------------------------------+
+                                       |
+                                       | HTTP / REST API (JSON)
+                                       v
+                      +----------------------------------+
+                      |          FastAPI Server          |
+                      |    (Async Request Pipeline)      |
+                      +----------------------------------+
+                           /           |            \
+                          /            |             \
+                         v             v              v
+        +-------------------+  +---------------+  +------------------+
+        |  PostgreSQL / DB  |  |  JWT Security |  | Google Gemini AI |
+        |  (AsyncSQLAlchemy)|  | (RBAC Middleware)| (Policy RAG)     |
+        +-------------------+  +---------------+  +------------------+
+```
+
+### 3.2 High-Level Component Topology (Mermaid Diagram)
 
 ```mermaid
 graph TD
@@ -76,7 +99,7 @@ graph TD
     end
 ```
 
-### 3.2 Component Request Lifecycle & Sequence Flow
+### 3.3 Component Request Lifecycle & Sequence Flow
 
 ```mermaid
 sequenceDiagram
@@ -109,7 +132,7 @@ sequenceDiagram
     Client-->>User: Update Reactive UI Components
 ```
 
-### 3.3 Data Ingestion & Grounded AI RAG Flow
+### 3.4 Data Ingestion & Grounded AI RAG Flow
 
 ```mermaid
 flowchart LR
