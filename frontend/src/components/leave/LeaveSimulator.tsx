@@ -48,7 +48,7 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
         </span>
       </div>
 
-      <form onSubmit={handleSimulate} className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+      <form onSubmit={handleSimulate} className="grid grid-cols-1 md:grid-cols-4 items-end gap-3 pt-1">
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">Leave Type</label>
           <select
@@ -88,14 +88,14 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
           />
         </div>
 
-        <div className="sm:col-span-3 pt-1">
+        <div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
+            className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 h-[38px]"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            {loading ? 'Calculating Balance Impact...' : 'Simulate Leave Eligibility'}
+            <span>{loading ? 'Calculating...' : 'Simulate Eligibility'}</span>
           </button>
         </div>
       </form>
