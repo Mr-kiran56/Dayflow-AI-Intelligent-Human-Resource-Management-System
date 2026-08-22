@@ -35,12 +35,12 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex items-center justify-center p-4 sm:p-6 relative overflow-y-auto">
+    <div className="h-screen h-[100dvh] w-full bg-slate-950 text-slate-100 flex items-center justify-center p-4 overflow-hidden relative">
       {/* Background Glow Mesh */}
       <div className="fixed -top-40 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed -bottom-40 -right-40 w-96 h-96 bg-brand-600/20 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-floating p-6 sm:p-8 border border-slate-200/80 my-auto relative z-10 text-slate-900">
+      <div className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto bg-white rounded-2xl shadow-floating p-6 sm:p-8 border border-slate-200/80 relative z-10 text-slate-900">
 
         {/* Brand Header */}
         <div className="text-center mb-8">

@@ -31,25 +31,31 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-5 shadow-floating border border-slate-800 space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xs font-extrabold uppercase tracking-wider text-brand-300 flex items-center gap-2">
-          <Calculator className="w-4 h-4 text-brand-400" />
-          What-If Leave Simulator
-        </h3>
-        <span className="px-2 py-0.5 text-[10px] font-bold bg-brand-500/20 text-brand-300 rounded-full border border-brand-500/30">
-          Smart Eligibility
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-subtle space-y-4 text-slate-900">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+            <Calculator className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">What-If Leave Balance Simulator</h3>
+            <p className="text-xs text-slate-500">Preview balance deduction before submitting formal time-off requests</p>
+          </div>
+        </div>
+
+        <span className="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">
+          Instant Eligibility Check
         </span>
       </div>
 
-      <form onSubmit={handleSimulate} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <form onSubmit={handleSimulate} className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
         <div>
-          <label className="block text-[11px] font-medium text-slate-300 mb-1">Leave Type</label>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">Leave Type</label>
           <select
             value={leaveTypeId}
             onChange={(e) => setLeaveTypeId(e.target.value)}
             required
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-brand-500"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium"
           >
             <option value="">Select leave type</option>
             {leaveTypes.map((lt) => (
@@ -61,65 +67,65 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
         </div>
 
         <div>
-          <label className="block text-[11px] font-medium text-slate-300 mb-1">Start Date</label>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">Start Date</label>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             required
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-brand-500"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium"
           />
         </div>
 
         <div>
-          <label className="block text-[11px] font-medium text-slate-300 mb-1">End Date</label>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">End Date</label>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             required
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-brand-500"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium"
           />
         </div>
 
-        <div className="sm:col-span-3">
+        <div className="sm:col-span-3 pt-1">
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5"
+            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            {loading ? 'Simulating...' : 'Simulate Leave Eligibility'}
+            {loading ? 'Calculating Balance Impact...' : 'Simulate Leave Eligibility'}
           </button>
         </div>
       </form>
 
       {result && (
         <div
-          className={`p-4 rounded-xl border text-xs space-y-1.5 animate-in fade-in duration-150 ${
+          className={`p-4 rounded-xl border text-xs space-y-2 animate-in fade-in duration-150 ${
             result.eligible
-              ? 'bg-emerald-950/50 border-emerald-500/30 text-emerald-200'
-              : 'bg-rose-950/50 border-rose-500/30 text-rose-200'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              : 'bg-rose-50 border-rose-200 text-rose-900'
           }`}
         >
           <div className="flex items-center gap-2 font-bold text-sm">
             {result.eligible ? (
               <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Eligible for Leave Request</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Leave Request Eligible</span>
               </>
             ) : (
               <>
-                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
                 <span>Ineligible Request</span>
               </>
             )}
           </div>
-          <p className="text-slate-300">{result.reason}</p>
-          <div className="pt-2 flex items-center justify-between text-[11px] border-t border-white/10 text-slate-300">
-            <span>Requested: <strong>{result.requested_days} days</strong></span>
-            <span>Available: <strong>{result.remaining_days} days</strong></span>
-            <span>After Request: <strong>{result.remaining_after_request} days</strong></span>
+          <p className="text-slate-700 font-medium">{result.reason}</p>
+          <div className="pt-2 flex items-center justify-between text-xs border-t border-slate-200/80 text-slate-800 font-medium">
+            <span>Requested Duration: <strong className="text-slate-900">{result.requested_days} days</strong></span>
+            <span>Available Balance: <strong className="text-slate-900">{result.remaining_days} days</strong></span>
+            <span>Projected Balance After Request: <strong className="text-indigo-600 font-bold">{result.remaining_after_request} days</strong></span>
           </div>
         </div>
       )}

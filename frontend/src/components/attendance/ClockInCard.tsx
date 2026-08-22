@@ -52,7 +52,7 @@ export const ClockInCard: React.FC = () => {
     try {
       const res = await attendanceService.checkIn('Checked in via My Day dashboard');
       setRecord(res);
-      setMessage(`Checked in at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+      setMessage(`Clocked in at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
     } catch (err: any) {
       setMessage(err.message || 'Check-in failed');
     } finally {
@@ -66,7 +66,7 @@ export const ClockInCard: React.FC = () => {
     try {
       const res = await attendanceService.checkOut('Checked out via My Day dashboard');
       setRecord(res);
-      setMessage(`Checked out at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+      setMessage(`Clocked out at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
     } catch (err: any) {
       setMessage(err.message || 'Check-out failed');
     } finally {
@@ -78,52 +78,52 @@ export const ClockInCard: React.FC = () => {
   const isCompleted = record?.check_in && record?.check_out;
 
   return (
-    <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-floating relative overflow-hidden border border-slate-800">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="bg-white rounded-2xl p-6 text-slate-900 shadow-subtle border border-slate-200 space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-indigo-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-200">Today's Shift Attendance</span>
+            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+              <Clock className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Today's Shift Attendance</span>
             {record?.status && <StatusBadge status={record.status} />}
           </div>
 
           <div className="flex items-baseline gap-3 pt-1">
-            <span className="text-3xl font-extrabold tracking-tight font-mono">{timerText}</span>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 border border-white/10">
+            <span className="text-3xl font-extrabold tracking-tight font-mono text-slate-900">{timerText}</span>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 border border-slate-200 bg-slate-50">
               {isWorking ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="text-emerald-400">Shift Active</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  <span className="text-emerald-700 font-bold">Shift Active</span>
                 </>
               ) : isCompleted ? (
                 <>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
-                  <span className="text-indigo-300">Shift Completed</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
+                  <span className="text-indigo-700 font-bold">Shift Completed</span>
                 </>
               ) : (
                 <>
                   <span className="w-2 h-2 rounded-full bg-slate-400" />
-                  <span className="text-slate-400">Not Clocked In</span>
+                  <span className="text-slate-500">Not Clocked In</span>
                 </>
               )}
             </span>
           </div>
 
-          <div className="flex items-center gap-6 text-xs text-slate-300 pt-1">
+          <div className="flex items-center gap-6 text-xs text-slate-600 pt-1">
             <div>
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Clock In</span>
-              <span className="font-semibold text-white">
+              <span className="text-slate-400 block text-[10px] uppercase font-bold">Clock In Time</span>
+              <span className="font-semibold text-slate-900 font-mono">
                 {record?.check_in
                   ? new Date(record.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                   : '--:--'}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Clock Out</span>
-              <span className="font-semibold text-white">
+              <span className="text-slate-400 block text-[10px] uppercase font-bold">Clock Out Time</span>
+              <span className="font-semibold text-slate-900 font-mono">
                 {record?.check_out
                   ? new Date(record.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                   : '--:--'}
@@ -138,7 +138,7 @@ export const ClockInCard: React.FC = () => {
             <button
               onClick={handleCheckIn}
               disabled={actionLoading}
-              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2"
             >
               <Play className="w-4 h-4 fill-white" />
               {actionLoading ? 'Clocking in...' : 'Clock In Now'}
@@ -149,7 +149,7 @@ export const ClockInCard: React.FC = () => {
             <button
               onClick={handleCheckOut}
               disabled={actionLoading}
-              className="px-6 py-3 bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2"
             >
               <Square className="w-4 h-4 fill-white" />
               {actionLoading ? 'Clocking out...' : 'Clock Out'}
@@ -157,14 +157,14 @@ export const ClockInCard: React.FC = () => {
           )}
 
           {isCompleted && (
-            <div className="px-4 py-2 bg-indigo-500/20 border border-indigo-500/30 rounded-xl text-indigo-300 text-xs font-semibold flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-indigo-400" />
-              Shift Recorded
+            <div className="px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-700 text-xs font-semibold flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-indigo-600" />
+              Shift Recorded for Today
             </div>
           )}
 
           {message && (
-            <p className="text-xs font-medium text-emerald-400 animate-in fade-in duration-150">
+            <p className="text-xs font-medium text-emerald-700 animate-in fade-in duration-150">
               {message}
             </p>
           )}
