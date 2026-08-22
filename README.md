@@ -33,7 +33,7 @@ DayFlow AI is a full-stack, asynchronous Human Resource Management System (HRMS)
 
 ```mermaid
 graph TD
-    Client["React 18 + TypeScript Client\n(Vite Bundle / Axios)"] -->|HTTP / REST API (JSON)| APIGateway["FastAPI ASGI Router\n(Uvicorn Engine)"]
+    Client["React 18 TypeScript Client (Vite App)"] -->|"REST API (JSON)"| APIGateway["FastAPI ASGI Router (Uvicorn Engine)"]
     
     subgraph Middleware Pipeline
         APIGateway --> CORSMiddleware["CORS Policy Guard"]
@@ -49,12 +49,12 @@ graph TD
     end
 
     subgraph Storage & External Services
-        AuthService --> Database[("PostgreSQL Database\n(AsyncSQLAlchemy 2.0)")]
+        AuthService --> Database[("PostgreSQL Database (AsyncSQLAlchemy 2.0)")]
         AttendanceService --> Database
         LeaveService --> Database
         PayrollService --> Database
-        GeminiAIService -->|Context Injection| Database
-        GeminiAIService -->|Async REST API| GeminiAPI["Google Gemini 3.7 Flash API"]
+        GeminiAIService -->|"Context Injection"| Database
+        GeminiAIService -->|"Async REST API"| GeminiAPI["Google Gemini 3.7 Flash API"]
     end
 ```
 
