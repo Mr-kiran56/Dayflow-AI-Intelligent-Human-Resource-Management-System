@@ -1,0 +1,10 @@
+{
+  "name": "dayflow-ai-hrms",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "npx concurrently -k -p \"[{name}]\" -n \"BACKEND,FRONTEND\" -c \"blue.bold,magenta.bold\" \"npm run dev:backend\" \"npm run dev:frontend\""
+  }
+}
