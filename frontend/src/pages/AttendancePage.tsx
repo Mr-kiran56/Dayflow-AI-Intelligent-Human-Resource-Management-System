@@ -4,7 +4,8 @@ import { attendanceService } from '../services/attendanceService';
 import { AttendanceRecord, AttendanceSummary } from '../types';
 import { exportToCSV } from '../utils/exportUtils';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import { AttendanceHeatmap } from '../components/attendance/AttendanceHeatmap';
+import { AttendanceCalendar } from '../components/attendance/AttendanceCalendar';
+
 
 
 import { KpiCard } from '../components/ui/KpiCard';
@@ -123,8 +124,9 @@ export const AttendancePage: React.FC = () => {
         </div>
       )}
 
-      {/* Monthly Attendance Heatmap */}
-      <AttendanceHeatmap records={records} />
+      {/* Interactive Google Calendar Attendance Tracker */}
+      <AttendanceCalendar records={records} />
+
 
 
       {/* Attendance History Table */}
