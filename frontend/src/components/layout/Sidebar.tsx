@@ -1,0 +1,152 @@
+import React, { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Users,
+  Clock,
+  CalendarDays,
+  CreditCard,
+  BarChart3,
+  Sparkles,
+  Bell,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  Building2,
+} from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+
+export const Sidebar: React.FC<{ mobileOpen: boolean; setMobileOpen: (val: boolean) => void }> = ({
+  mobileOpen,
+  setMobileOpen,
+}) => {
+  const { user, logout, isAdminOrHr } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+
+  const navItems = [
+    {
+      name: isAdminOrHr ? 'Workforce Command' : 'My Day',
+      path: isAdminOrHr ? '/admin/dashboard' : '/dashboard',
+      icon: LayoutDashboard,
+    },
+    ...(isAdminOrHr
+      ? [
+          { name: 'Employees', path: '/employees', icon: Users },
+        ]
+      : []),
+    { name: 'Attendance', path: '/attendance', icon: Clock },
+    { name: 'Leave & Time-Off', path: '/leave', icon: CalendarDays },
+    { name: 'Payroll', path: '/payroll', icon: CreditCard },
+    { name: 'Analytics & Insights', path: '/analytics', icon: BarChart3 },
+    { name: 'Dayflow AI', path: '/ai', icon: Sparkles, badge: 'AI' },
+    { name: 'Notifications', path: '/notifications', icon: Bell },
+  ];
+
+  return (
+    <>
+      {/* Mobile Backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed top-0 left-0 bottom-0 z-50 bg-white border-r border-slate-200 flex flex-col justify-between transition-all duration-300 ${
+          collapsed ? 'w-20' : 'w-64'
+        } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+      >
+        {/* Top Brand Header */}
+        <div>
+          <div className="h-16 px-4 flex items-center justify-between border-b border-slate-100">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center font-extrabold text-lg shadow-sm shrink-0">
+                D
+              </div>
+              {!collapsed && (
+                <div className="flex flex-col overflow-hidden">
+                  <span className="font-bold text-slate-900 tracking-tight text-sm flex items-center gap-1">
+                    DAYFLOW <span className="text-brand-600 font-extrabold text-xs">AI</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium truncate">Intelligent HRMS</span>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+            >
+              {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
+
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-xs transition-all ${
+                      isActive
+                        ? 'bg-brand-50 text-brand-700 font-semibold shadow-subtle'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    }`
+                  }
+                  title={collapsed ? item.name : undefined}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand-600' : 'text-slate-400'}`} />
+                  {!collapsed && <span className="truncate flex-1">{item.name}</span>}
+                  {!collapsed && item.badge && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-brand-100 text-brand-700 rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </NavLink>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* User Footer Profile Card */}
+        <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+          <div className="flex items-center justify-between gap-2 overflow-hidden">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                {user?.full_name?.charAt(0) || 'U'}
+              </div>
+              {!collapsed && (
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-slate-900 truncate">{user?.full_name}</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-slate-500 truncate">{user?.employee_id}</span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded font-semibold uppercase bg-brand-100 text-brand-700">
+                      {user?.role}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={logout}
+              title="Logout"
+              className="p-1.5 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+};
