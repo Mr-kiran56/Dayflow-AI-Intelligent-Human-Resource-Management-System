@@ -6,7 +6,7 @@ import { LeaveSimulator } from '../components/leave/LeaveSimulator';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { KpiCard } from '../components/ui/KpiCard';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
-import { CalendarDays, Plus, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
+import { CalendarDays, Plus, CheckCircle, XCircle, Clock, FileText, AlertCircle } from 'lucide-react';
 
 export const LeavePage: React.FC = () => {
   const { user, isAdminOrHr } = useAuth();
@@ -14,6 +14,7 @@ export const LeavePage: React.FC = () => {
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pageError, setPageError] = useState<string | null>(null);
 
   // Request modal form
   const [showModal, setShowModal] = useState(false);
@@ -71,11 +72,12 @@ export const LeavePage: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to cancel this leave request?')) return;
+    setPageError(null);
     try {
       await leaveService.deleteRequest(id);
       await loadLeaveData();
     } catch (err: any) {
-      alert(err.message || 'Deletion failed');
+      setPageError(err.message || 'Cancellation failed');
     }
   };
 
@@ -92,12 +94,19 @@ export const LeavePage: React.FC = () => {
 
         <button
           onClick={() => setShowModal(true)}
-          className="inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Request Time Off</span>
         </button>
       </div>
+
+      {pageError && (
+        <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-medium flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{pageError}</span>
+        </div>
+      )}
 
       {/* Leave Balances Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -120,7 +129,7 @@ export const LeavePage: React.FC = () => {
       {/* Submitted Leave Requests Table */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-subtle">
         <h3 className="text-sm font-bold text-slate-900 pb-4 border-b border-slate-100 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-brand-600" />
+          <FileText className="w-4 h-4 text-indigo-600" />
           My Submitted Leave Requests
         </h3>
 
@@ -196,7 +205,7 @@ export const LeavePage: React.FC = () => {
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
                   required
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-brand-600"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-600"
                 >
                   <option value="">Select type</option>
                   {leaveTypes.map((lt) => (
@@ -215,7 +224,7 @@ export const LeavePage: React.FC = () => {
                     required
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-brand-600"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-600"
                   />
                 </div>
                 <div>
@@ -225,7 +234,7 @@ export const LeavePage: React.FC = () => {
                     required
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-brand-600"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-600"
                   />
                 </div>
               </div>
@@ -237,7 +246,7 @@ export const LeavePage: React.FC = () => {
                   onChange={(e) => setRemarks(e.target.value)}
                   placeholder="e.g. Family vacation"
                   rows={2}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-brand-600"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-600"
                 />
               </div>
 
@@ -252,7 +261,7 @@ export const LeavePage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-sm"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm"
                 >
                   {submitting ? 'Submitting...' : 'Submit Request'}
                 </button>

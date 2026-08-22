@@ -11,6 +11,7 @@ from app.core.exceptions import (
     NotFoundException,
 )
 from app.core.security import create_access_token
+from app.db.enums import Role
 from app.db.models.profile import Profile
 from app.db.models.leave import LeaveType, LeaveBalance
 from app.schemas.auth import SignupRequest, LoginRequest, AuthTokenData, UserProfileSummary
@@ -59,7 +60,7 @@ class AuthService:
         profile = Profile(
             auth_user_id=auth_user_id,
             employee_id=req.employee_id,
-            role=req.role,
+            role=Role.EMPLOYEE,
             full_name=req.full_name,
             email=req.email,
             phone=req.phone,
@@ -113,6 +114,30 @@ class AuthService:
 
         if not profile.is_active:
             raise AuthInvalidCredentialsException("Account is disabled")
+
+        if settings.SUPABASE_URL and settings.SUPABASE_ANON_KEY and settings.SUPABASE_URL.startswith("https://"):
+            try:
+                async with httpx.AsyncClient() as client:
+                    resp = await client.post(
+                        f"{settings.SUPABASE_URL}/auth/v1/token?grant_type=password",
+                        headers={
+                            "apikey": settings.SUPABASE_ANON_KEY,
+                            "Content-Type": "application/json",
+                        },
+                        json={
+                            "email": req.email,
+                            "password": req.password,
+                        },
+                        timeout=5.0,
+                    )
+                    if resp.status_code != 200:
+                        raise AuthInvalidCredentialsException("Invalid email or password")
+            except AuthInvalidCredentialsException:
+                raise
+            except Exception:
+                raise AuthInvalidCredentialsException("Invalid email or password")
+        else:
+            raise AuthInvalidCredentialsException("Invalid email or password")
 
         token = create_access_token(
             data={

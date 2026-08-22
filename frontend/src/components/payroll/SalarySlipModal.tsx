@@ -21,32 +21,68 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, user,
   const net = Number(payroll.net_salary);
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-2xl w-full shadow-floating border border-slate-200 overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #printable-payslip, #printable-payslip * {
+            visibility: visible !important;
+          }
+          #printable-payslip {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 30px !important;
+            background: white !important;
+            color: black !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+          .print\\:hidden {
+            display: none !important;
+          }
+        }
+      `}</style>
 
-        {/* Modal Top Action Bar */}
-        <div className="bg-slate-900 text-white p-4 flex items-center justify-between print:hidden">
+      {/* Modal Container */}
+      <div className="bg-white rounded-2xl max-w-2xl w-full shadow-floating border border-slate-200 overflow-hidden my-auto max-h-[90vh] flex flex-col">
+
+        {/* Sticky Top Action Bar */}
+        <div className="bg-slate-900 text-white px-5 py-4 flex items-center justify-between shrink-0 print:hidden border-b border-slate-800">
           <div className="flex items-center gap-2">
             <Building2 className="w-5 h-5 text-indigo-400" />
-            <h3 className="text-sm font-bold">Official Salary Payslip Statement</h3>
+            <div>
+              <h3 className="text-sm font-bold">Official Salary Payslip Statement</h3>
+              <p className="text-[10px] text-slate-400">Statement Month: {payroll.payroll_month}</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+              title="Print or Save as System PDF"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-4 h-4" />
               <span>Print / Download PDF</span>
             </button>
-            <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors">
+
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              title="Close Modal"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Printable Payslip Body */}
-        <div className="p-8 space-y-6 text-slate-900 bg-white" id="printable-payslip">
+        {/* Inner Scrollable Printable Body */}
+        <div className="overflow-y-auto flex-1 p-6 sm:p-8 space-y-6 text-slate-900 bg-white custom-scrollbar" id="printable-payslip">
 
           {/* Letterhead */}
           <div className="flex items-center justify-between pb-6 border-b border-slate-200">
@@ -153,6 +189,28 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, user,
               <p className="font-bold text-slate-800">Priya Sharma</p>
               <p className="text-[10px] text-slate-400">Head of People Operations</p>
             </div>
+          </div>
+        </div>
+
+        {/* Modal Bottom Fixed Action Bar */}
+        <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-between shrink-0 print:hidden">
+          <p className="text-[11px] text-slate-500 font-medium">
+            Clicking <span className="font-bold text-slate-800">Print / Download PDF</span> opens system printer to Save as PDF.
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrint}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Print / Download PDF</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl transition-all"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>

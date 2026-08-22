@@ -24,9 +24,9 @@ from app.utils.response_formatter import error_response
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
+    if settings.APP_ENV == "production" and (not settings.SUPABASE_JWT_SECRET or settings.SUPABASE_JWT_SECRET == "secret"):
+        raise RuntimeError("SUPABASE_JWT_SECRET must be configured securely in production environment")
     yield
-
     await engine.dispose()
 
 

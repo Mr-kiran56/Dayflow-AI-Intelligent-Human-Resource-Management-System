@@ -22,10 +22,9 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
 
 
 def decode_access_token(token: str) -> Dict[str, Any]:
-    """Decode and verify JWT access token."""
+    """Decode and verify JWT access token strictly with HS256 signature verification."""
     secret = settings.SUPABASE_JWT_SECRET or "secret"
     try:
-
         payload = jwt.decode(
             token,
             secret,
@@ -36,13 +35,4 @@ def decode_access_token(token: str) -> Dict[str, Any]:
     except jwt.ExpiredSignatureError:
         raise AuthInvalidCredentialsException("Authentication token has expired")
     except jwt.InvalidTokenError:
-
-        try:
-            payload = jwt.decode(
-                token,
-                options={"verify_signature": False, "verify_aud": False},
-                algorithms=[ALGORITHM, "RS256"],
-            )
-            return payload
-        except Exception:
-            raise AuthInvalidCredentialsException("Invalid authentication token")
+        raise AuthInvalidCredentialsException("Invalid authentication token")

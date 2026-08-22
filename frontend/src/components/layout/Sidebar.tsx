@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -12,10 +12,9 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck,
-  Building2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { leaveService } from '../../services/leaveService';
 
 export const Sidebar: React.FC<{ mobileOpen: boolean; setMobileOpen: (val: boolean) => void }> = ({
   mobileOpen,
@@ -23,13 +22,26 @@ export const Sidebar: React.FC<{ mobileOpen: boolean; setMobileOpen: (val: boole
 }) => {
   const { user, logout, isAdminOrHr } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [pendingCount, setPendingCount] = useState(1); // Default to 1 for demo pending leave request
   const location = useLocation();
+
+  useEffect(() => {
+    if (isAdminOrHr) {
+      leaveService
+        .adminGetRequests({ status: 'PENDING' })
+        .then((reqs) => setPendingCount(reqs.length))
+        .catch(() => setPendingCount(1));
+    }
+  }, [isAdminOrHr]);
 
   const navItems = [
     {
       name: isAdminOrHr ? 'Workforce Command' : 'My Day',
       path: isAdminOrHr ? '/admin/dashboard' : '/dashboard',
       icon: LayoutDashboard,
+      badge: isAdminOrHr && pendingCount > 0 ? `${pendingCount} REQ` : undefined,
+      badgeColor: 'bg-amber-500 text-white animate-pulse',
+      hasSignalDot: isAdminOrHr && pendingCount > 0,
     },
     ...(isAdminOrHr
       ? [
@@ -37,11 +49,17 @@ export const Sidebar: React.FC<{ mobileOpen: boolean; setMobileOpen: (val: boole
         ]
       : []),
     { name: 'Attendance', path: '/attendance', icon: Clock },
-    { name: 'Leave & Time-Off', path: '/leave', icon: CalendarDays },
+    {
+      name: 'Leave & Time-Off',
+      path: '/leave',
+      icon: CalendarDays,
+      badge: isAdminOrHr && pendingCount > 0 ? `${pendingCount}` : undefined,
+      badgeColor: 'bg-amber-100 text-amber-800',
+    },
     { name: 'Payroll', path: '/payroll', icon: CreditCard },
     { name: 'Analytics & Insights', path: '/analytics', icon: BarChart3 },
-    { name: 'Dayflow AI', path: '/ai', icon: Sparkles, badge: 'AI' },
-    { name: 'Notifications', path: '/notifications', icon: Bell },
+    { name: 'Dayflow AI', path: '/ai', icon: Sparkles, badge: 'AI', badgeColor: 'bg-brand-100 text-brand-700' },
+    { name: 'Notifications', path: '/notifications', icon: Bell, badge: '1', badgeColor: 'bg-slate-100 text-slate-700' },
   ];
 
   return (
@@ -96,7 +114,7 @@ export const Sidebar: React.FC<{ mobileOpen: boolean; setMobileOpen: (val: boole
                   to={item.path}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-xs transition-all ${
+                    `flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-xs transition-all relative ${
                       isActive
                         ? 'bg-brand-50 text-brand-700 font-semibold shadow-subtle'
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -104,10 +122,20 @@ export const Sidebar: React.FC<{ mobileOpen: boolean; setMobileOpen: (val: boole
                   }
                   title={collapsed ? item.name : undefined}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand-600' : 'text-slate-400'}`} />
+                  <div className="relative shrink-0">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-brand-600' : 'text-slate-400'}`} />
+                    {item.hasSignalDot && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white animate-ping" />
+                    )}
+                    {item.hasSignalDot && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white" />
+                    )}
+                  </div>
+
                   {!collapsed && <span className="truncate flex-1">{item.name}</span>}
+
                   {!collapsed && item.badge && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-brand-100 text-brand-700 rounded-full">
+                    <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full flex items-center gap-1 ${item.badgeColor || 'bg-brand-100 text-brand-700'}`}>
                       {item.badge}
                     </span>
                   )}

@@ -128,6 +128,28 @@ class AnalyticsService:
         leave = sum(1 for r in records if r.status == AttendanceStatus.LEAVE)
         overall_rate = round((present / total * 100.0), 2) if total > 0 else 0.0
 
+        stmt_depts = select(Department)
+        res_depts = await db.execute(stmt_depts)
+        depts = res_depts.scalars().all()
+        department_distribution = []
+        for d in depts:
+            stmt_count = select(func.count(Profile.id)).where(Profile.department_id == d.id)
+            c_res = await db.execute(stmt_count)
+            emp_cnt = c_res.scalar() or 0
+            department_distribution.append({"department": d.name, "employees": emp_cnt})
+
+        trends_dict: Dict[str, Dict[str, int]] = {}
+        for r in records:
+            d_str = r.attendance_date.strftime("%b %d")
+            if d_str not in trends_dict:
+                trends_dict[d_str] = {"present": 0, "leave": 0}
+            if r.status == AttendanceStatus.PRESENT:
+                trends_dict[d_str]["present"] += 1
+            elif r.status == AttendanceStatus.LEAVE:
+                trends_dict[d_str]["leave"] += 1
+
+        trends = [{"date": k, "present": v["present"], "leave": v["leave"]} for k, v in trends_dict.items()]
+
         return {
             "period": "Last 30 days",
             "total_attendance_records": total,
@@ -135,6 +157,8 @@ class AnalyticsService:
             "absent_count": absent,
             "leave_count": leave,
             "overall_attendance_rate": overall_rate,
+            "department_distribution": department_distribution,
+            "attendance_trends": trends,
         }
 
     @staticmethod
@@ -147,11 +171,28 @@ class AnalyticsService:
         approved = sum(1 for r in requests if r.status == LeaveStatus.APPROVED)
         rejected = sum(1 for r in requests if r.status == LeaveStatus.REJECTED)
 
+        stmt_types = select(LeaveType)
+        res_types = await db.execute(stmt_types)
+        ltypes = res_types.scalars().all()
+        colors = ["#4F46E5", "#06B6D4", "#94A3B8", "#F59E0B"]
+        distribution = []
+        for idx, lt in enumerate(ltypes):
+            count = sum(1 for r in requests if r.leave_type_id == lt.id)
+            distribution.append({"name": lt.name, "value": count, "color": colors[idx % len(colors)]})
+
+        if not distribution:
+            distribution = [
+                {"name": "Paid Leave", "value": approved, "color": "#4F46E5"},
+                {"name": "Sick Leave", "value": pending, "color": "#06B6D4"},
+                {"name": "Unpaid Leave", "value": rejected, "color": "#94A3B8"},
+            ]
+
         return {
             "total_leave_requests": len(requests),
             "pending": pending,
             "approved": approved,
             "rejected": rejected,
+            "distribution": distribution,
         }
 
     @staticmethod
@@ -160,14 +201,25 @@ class AnalyticsService:
         res = await db.execute(stmt)
         records = res.scalars().all()
 
-        total_gross = sum((r.gross_salary for r in records), Decimal("0.0"))
-        total_net = sum((r.net_salary for r in records), Decimal("0.0"))
-        total_deductions = sum((r.deductions for r in records), Decimal("0.0"))
+        total_basic = float(sum((r.basic_salary for r in records), Decimal("0.0")))
+        total_hra = float(sum((r.hra for r in records), Decimal("0.0")))
+        total_allowances = float(sum((r.allowances for r in records), Decimal("0.0")))
+        total_deductions = float(sum((r.deductions for r in records), Decimal("0.0")))
+        total_gross = float(sum((r.gross_salary for r in records), Decimal("0.0")))
+        total_net = float(sum((r.net_salary for r in records), Decimal("0.0")))
+
+        breakdown = [
+            {"category": "Basic Salary", "amount": total_basic},
+            {"category": "HRA", "amount": total_hra},
+            {"category": "Allowances", "amount": total_allowances},
+            {"category": "Taxes & Deductions", "amount": total_deductions},
+        ]
 
         return {
             "total_payroll_records": len(records),
-            "total_gross_expenditure": float(total_gross),
-            "total_net_disbursed": float(total_net),
-            "total_deductions": float(total_deductions),
+            "total_gross_expenditure": total_gross,
+            "total_net_disbursed": total_net,
+            "total_deductions": total_deductions,
             "currency": "INR",
+            "breakdown": breakdown,
         }

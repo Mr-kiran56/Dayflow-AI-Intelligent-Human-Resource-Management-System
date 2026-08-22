@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_current_user, require_roles
+from app.core.exceptions import ForbiddenException
 from app.db.enums import Role
 from app.db.models.profile import Profile
 from app.db.session import get_db
@@ -61,7 +62,7 @@ async def ai_chat(
 
     answer = await GeminiService.generate_response(system_instruction, context_data, req.message)
 
-    return success_response(data={"answer": answer, "context_used": context_data})
+    return success_response(data={"answer": answer})
 
 
 @router.post("/ai/attendance-insight")
@@ -118,6 +119,8 @@ async def ai_salary_explanation(
 ):
     if req and req.payroll_id:
         payroll = await PayrollService.get_payroll_by_id(db, req.payroll_id)
+        if current_user.role not in (Role.ADMIN, Role.HR) and str(payroll.employee_id) != str(current_user.id):
+            raise ForbiddenException("Access denied to another employee's payroll record")
     else:
         payroll = await PayrollService.get_my_payroll(db, current_user.id)
 
@@ -186,4 +189,3 @@ async def ai_policy_rag(
     from app.services.pinecone_service import PineconeService
     res = await PineconeService.query_policy_rag(req.message)
     return success_response(data=res)
-

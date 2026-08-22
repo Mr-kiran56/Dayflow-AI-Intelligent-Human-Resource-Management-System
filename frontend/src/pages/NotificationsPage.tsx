@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { notificationService } from '../services/notificationService';
 import { NotificationItem } from '../types';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 import { Bell, CheckCheck, CheckCircle, Info, Calendar, CreditCard } from 'lucide-react';
 
 export const NotificationsPage: React.FC = () => {
@@ -58,7 +59,7 @@ export const NotificationsPage: React.FC = () => {
             onClick={handleMarkAllRead}
             className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition-all self-start sm:self-auto"
           >
-            <CheckCheck className="w-4 h-4 text-brand-600" />
+            <CheckCheck className="w-4 h-4 text-indigo-600" />
             <span>Mark All as Read ({unreadCount})</span>
           </button>
         )}
@@ -68,26 +69,27 @@ export const NotificationsPage: React.FC = () => {
         {loading ? (
           <LoadingSkeleton rows={4} />
         ) : notifications.length === 0 ? (
-          <div className="py-12 text-center text-xs text-slate-400">
-            <Bell className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-            No notifications yet. You're all caught up!
-          </div>
+          <EmptyState
+            icon={Bell}
+            title="No Notifications"
+            description="You have no notifications or system alerts at this time. All caught up!"
+          />
         ) : (
           notifications.map((n) => (
             <div
               key={n.id}
               onClick={() => !n.is_read && handleMarkRead(n.id)}
               className={`py-4 px-3 flex items-start gap-4 transition-colors cursor-pointer rounded-xl ${
-                !n.is_read ? 'bg-brand-50/40 font-medium' : 'hover:bg-slate-50'
+                !n.is_read ? 'bg-indigo-50/40 font-medium' : 'hover:bg-slate-50'
               }`}
             >
-              <div className="p-2.5 bg-white border border-slate-200 text-brand-600 rounded-xl shadow-subtle shrink-0 mt-0.5">
+              <div className="p-2.5 bg-white border border-slate-200 text-indigo-600 rounded-xl shadow-subtle shrink-0 mt-0.5">
                 {n.type.includes('LEAVE') ? (
                   <Calendar className="w-4 h-4 text-blue-600" />
                 ) : n.type.includes('PAYROLL') ? (
                   <CreditCard className="w-4 h-4 text-emerald-600" />
                 ) : (
-                  <Info className="w-4 h-4 text-brand-600" />
+                  <Info className="w-4 h-4 text-indigo-600" />
                 )}
               </div>
 
@@ -101,7 +103,7 @@ export const NotificationsPage: React.FC = () => {
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed">{n.message}</p>
               </div>
 
-              {!n.is_read && <span className="w-2 h-2 rounded-full bg-brand-600 shrink-0 mt-2" />}
+              {!n.is_read && <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0 mt-2" />}
             </div>
           ))
         )}
