@@ -198,7 +198,7 @@ export const Signup: React.FC = () => {
                 />
               </div>
 
-              {/* Password & Confirm Password Grid with Absolute Floating Popover Checklist */}
+              {/* Password & Confirm Password Grid */}
               <div className="relative">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -241,7 +241,7 @@ export const Signup: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Floating Overlay Hover Popover - Does NOT Shift Card Layout */}
+                {/* Floating Overlay Hover Popover */}
                 {(showChecklistPopover || (password && !isPasswordValid)) && (
                   <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/90 shadow-[0_15px_35px_rgba(0,0,0,0.18)] text-[11px] space-y-1 animate-in fade-in slide-in-from-top-1 duration-150">
                     <p className="font-bold text-slate-800 mb-1 flex items-center justify-between">
@@ -308,30 +308,53 @@ export const Signup: React.FC = () => {
             </div>
 
             <div className="text-center space-y-1">
-              <h3 className="text-lg font-bold text-slate-900">Email Verification Required</h3>
+              <h3 className="text-lg font-bold text-slate-900">Email Verification Sent</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                An activation link has been generated for <span className="font-bold text-[#1a73e8]">{email}</span>. You must verify your email before sign in is granted.
+                An activation link has been sent to <span className="font-bold text-[#1a73e8]">{email}</span>. You must verify your email before sign in is permitted.
               </p>
             </div>
 
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 flex items-center gap-2 font-medium">
-              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>Redirection disabled until email verification succeeds.</span>
+            <div className="p-3.5 bg-blue-50 border border-blue-200/80 rounded-2xl text-xs text-blue-900 space-y-1.5">
+              <div className="flex items-center gap-2 font-bold text-blue-950">
+                <CheckCircle2 className="w-4 h-4 text-[#34A853] shrink-0" />
+                <span>Evaluation & Test Verification Link</span>
+              </div>
+              <p className="text-[11px] text-blue-800 leading-relaxed">
+                If custom SMTP credentials (e.g. SendGrid/Resend) are not configured in your local environment, use the instant verification link below to verify your account in 1 click.
+              </p>
             </div>
 
-            <div className="pt-2">
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                disabled={isVerifying}
+                onClick={handleVerifyEmail}
+                className="w-full py-3 bg-[#34A853] hover:bg-[#2d9247] text-white font-bold text-xs rounded-full transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+              >
+                {isVerifying ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Verifying & Activating Account...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>📩 Verify Email & Activate Account Now</span>
+                  </>
+                )}
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
                   setVerificationModalOpen(false);
                   navigate('/login', {
-                    state: { info: `Account created for ${email}. Please open your email inbox and click the verification link before logging in.` },
+                    state: { info: `Registration complete for ${email}. Please check your email inbox or click verification link before logging in.` },
                   });
                 }}
-                className="w-full py-3 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold text-xs rounded-full transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-full transition-all flex items-center justify-center gap-1.5"
               >
-                <span>Proceed to Sign In</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Return to Sign In</span>
               </button>
             </div>
           </div>

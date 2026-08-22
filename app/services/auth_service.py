@@ -16,6 +16,7 @@ from app.db.models.profile import Profile
 from app.db.models.leave import LeaveType, LeaveBalance
 from app.db.models.notification import Notification
 from app.schemas.auth import SignupRequest, LoginRequest, AuthTokenData, UserProfileSummary
+from app.services.email_service import EmailService
 
 
 class AuthService:
@@ -35,29 +36,7 @@ class AuthService:
 
         auth_user_id = uuid.uuid4()
 
-        if settings.SUPABASE_URL and settings.SUPABASE_ANON_KEY and settings.SUPABASE_URL.startswith("https://"):
-            try:
-                async with httpx.AsyncClient() as client:
-                    resp = await client.post(
-                        f"{settings.SUPABASE_URL}/auth/v1/signup",
-                        headers={
-                            "apikey": settings.SUPABASE_ANON_KEY,
-                            "Content-Type": "application/json",
-                        },
-                        json={
-                            "email": req.email,
-                            "password": req.password,
-                        },
-                        timeout=5.0,
-                    )
-                    if resp.status_code in (200, 201):
-                        supa_data = resp.json()
-                        supa_user = supa_data.get("user") or {}
-                        if supa_user.get("id"):
-                            auth_user_id = uuid.UUID(supa_user["id"])
-            except Exception:
-                pass
-
+        # Handle account profile creation directly in PostgreSQL database to prevent Supabase default email bounce-backs
         profile = Profile(
             auth_user_id=auth_user_id,
             employee_id=req.employee_id,
@@ -102,6 +81,15 @@ class AuthService:
         await db.commit()
         await db.refresh(profile)
 
+        # Dispatch live outbound email via EmailService (if custom SMTP is set in .env)
+        origin = settings.CORS_ORIGINS[0] if isinstance(settings.CORS_ORIGINS, list) and settings.CORS_ORIGINS else "http://localhost:5173"
+        verify_url = f"{origin}/login?verify_email={profile.email}"
+        await EmailService.send_verification_email(
+            to_email=profile.email,
+            full_name=profile.full_name,
+            verify_url=verify_url,
+        )
+
         token = create_access_token(
             data={
                 "sub": str(profile.auth_user_id),
@@ -129,24 +117,6 @@ class AuthService:
 
         if not profile.is_email_verified:
             raise AuthInvalidCredentialsException("Email not verified. Please check your inbox and verify your email before logging in.")
-
-        if settings.SUPABASE_URL and settings.SUPABASE_ANON_KEY and settings.SUPABASE_URL.startswith("https://"):
-            try:
-                async with httpx.AsyncClient() as client:
-                    await client.post(
-                        f"{settings.SUPABASE_URL}/auth/v1/token?grant_type=password",
-                        headers={
-                            "apikey": settings.SUPABASE_ANON_KEY,
-                            "Content-Type": "application/json",
-                        },
-                        json={
-                            "email": req.email,
-                            "password": req.password,
-                        },
-                        timeout=3.0,
-                    )
-            except Exception:
-                pass
 
         token = create_access_token(
             data={

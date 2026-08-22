@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3.7-flash"
 
+    # Outbound SMTP Mail Settings for Real Email Verification
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    EMAILS_FROM_EMAIL: str = "noreply@dayflow.ai"
+
     CORS_ORIGINS: Union[str, List[str]] = "http://localhost:5173"
 
     LOG_LEVEL: str = "INFO"
