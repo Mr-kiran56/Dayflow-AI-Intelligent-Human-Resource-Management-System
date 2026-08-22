@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LeaveType, LeaveEligibilityResult } from '../../types';
 import { leaveService } from '../../services/leaveService';
-import { Calculator, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react';
+import { Calculator, CheckCircle2, AlertTriangle, Sparkles, AlertCircle } from 'lucide-react';
 
 export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTypes }) => {
   const [leaveTypeId, setLeaveTypeId] = useState<string>('');
@@ -9,12 +9,14 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
   const [endDate, setEndDate] = useState<string>('');
   const [result, setResult] = useState<LeaveEligibilityResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [simError, setSimError] = useState<string | null>(null);
 
   const handleSimulate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!leaveTypeId || !startDate || !endDate) return;
     setLoading(true);
     setResult(null);
+    setSimError(null);
 
     try {
       const res = await leaveService.checkEligibility({
@@ -24,7 +26,7 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
       });
       setResult(res);
     } catch (err: any) {
-      alert(err.message || 'Simulation error');
+      setSimError(err.message || 'Simulation error. Please check selected dates.');
     } finally {
       setLoading(false);
     }
@@ -48,6 +50,13 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
         </span>
       </div>
 
+      {simError && (
+        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{simError}</span>
+        </div>
+      )}
+
       <form onSubmit={handleSimulate} className="grid grid-cols-1 md:grid-cols-4 items-end gap-3 pt-1">
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">Leave Type</label>
@@ -55,11 +64,11 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
             value={leaveTypeId}
             onChange={(e) => setLeaveTypeId(e.target.value)}
             required
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium"
+            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-semibold"
           >
-            <option value="">Select leave type</option>
+            <option value="" className="text-slate-500 bg-white">Select leave type</option>
             {leaveTypes.map((lt) => (
-              <option key={lt.id} value={lt.id}>
+              <option key={lt.id} value={lt.id} className="text-slate-900 bg-white font-medium">
                 {lt.name}
               </option>
             ))}
@@ -73,7 +82,7 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             required
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium"
+            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-semibold"
           />
         </div>
 
@@ -84,7 +93,7 @@ export const LeaveSimulator: React.FC<{ leaveTypes: LeaveType[] }> = ({ leaveTyp
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             required
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium"
+            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-semibold"
           />
         </div>
 

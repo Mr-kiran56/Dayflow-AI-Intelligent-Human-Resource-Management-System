@@ -141,6 +141,7 @@ async def seed_database() -> None:
                     job_title=title,
                     joined_date=date(2024, 1, 15),
                     is_active=True,
+                    is_email_verified=True,
                 )
                 session.add(profile)
                 await session.flush()

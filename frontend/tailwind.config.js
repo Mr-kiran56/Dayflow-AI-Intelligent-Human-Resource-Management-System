@@ -44,7 +44,15 @@ export default {
         rose: {
           500: '#F43F5E',
           600: '#E11D48',
-        }
+        },
+        ai: {
+          50: '#ECFEFF',
+          100: '#CFFAFE',
+          400: '#22D3EE',
+          500: '#06B6D4',
+          600: '#0891B2',
+          700: '#0E7490',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],

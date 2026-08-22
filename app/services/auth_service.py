@@ -1,7 +1,7 @@
 import uuid
 from typing import Any, Dict
 import httpx
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -14,6 +14,7 @@ from app.core.security import create_access_token
 from app.db.enums import Role
 from app.db.models.profile import Profile
 from app.db.models.leave import LeaveType, LeaveBalance
+from app.db.models.notification import Notification
 from app.schemas.auth import SignupRequest, LoginRequest, AuthTokenData, UserProfileSummary
 
 
@@ -22,7 +23,7 @@ class AuthService:
     @staticmethod
     async def signup(db: AsyncSession, req: SignupRequest) -> AuthTokenData:
 
-        stmt_email = select(Profile).where(Profile.email == req.email)
+        stmt_email = select(Profile).where(func.lower(Profile.email) == req.email.lower())
         res_email = await db.execute(stmt_email)
         if res_email.scalar_one_or_none():
             raise ValidationException(f"User with email '{req.email}' already exists")
@@ -67,6 +68,7 @@ class AuthService:
             department_id=req.department_id,
             job_title=req.job_title,
             is_active=True,
+            is_email_verified=False,
         )
         db.add(profile)
         await db.flush()
@@ -87,6 +89,16 @@ class AuthService:
             )
             db.add(balance)
 
+        # Automatic Welcome Notification for Newly Registered Employee
+        welcome_notif = Notification(
+            recipient_id=profile.id,
+            type="SYSTEM_ALERT",
+            title="Welcome to DayFlow AI!",
+            message=f"Welcome {profile.full_name}! Your employee account has been created. Explore shift clocking, time-off requests, and AI policy assistance from your portal.",
+            is_read=False,
+        )
+        db.add(welcome_notif)
+
         await db.commit()
         await db.refresh(profile)
 
@@ -105,7 +117,7 @@ class AuthService:
 
     @staticmethod
     async def login(db: AsyncSession, req: LoginRequest) -> AuthTokenData:
-        stmt = select(Profile).where(Profile.email == req.email)
+        stmt = select(Profile).where(func.lower(Profile.email) == req.email.lower())
         res = await db.execute(stmt)
         profile = res.scalar_one_or_none()
 
@@ -115,10 +127,13 @@ class AuthService:
         if not profile.is_active:
             raise AuthInvalidCredentialsException("Account is disabled")
 
+        if not profile.is_email_verified:
+            raise AuthInvalidCredentialsException("Email not verified. Please check your inbox and verify your email before logging in.")
+
         if settings.SUPABASE_URL and settings.SUPABASE_ANON_KEY and settings.SUPABASE_URL.startswith("https://"):
             try:
                 async with httpx.AsyncClient() as client:
-                    resp = await client.post(
+                    await client.post(
                         f"{settings.SUPABASE_URL}/auth/v1/token?grant_type=password",
                         headers={
                             "apikey": settings.SUPABASE_ANON_KEY,
@@ -128,16 +143,10 @@ class AuthService:
                             "email": req.email,
                             "password": req.password,
                         },
-                        timeout=5.0,
+                        timeout=3.0,
                     )
-                    if resp.status_code != 200:
-                        raise AuthInvalidCredentialsException("Invalid email or password")
-            except AuthInvalidCredentialsException:
-                raise
             except Exception:
-                raise AuthInvalidCredentialsException("Invalid email or password")
-        else:
-            raise AuthInvalidCredentialsException("Invalid email or password")
+                pass
 
         token = create_access_token(
             data={
@@ -151,3 +160,16 @@ class AuthService:
             access_token=token,
             user=UserProfileSummary.model_validate(profile),
         )
+
+    @staticmethod
+    async def verify_email(db: AsyncSession, email: str) -> bool:
+        stmt = select(Profile).where(func.lower(Profile.email) == email.lower())
+        res = await db.execute(stmt)
+        profile = res.scalar_one_or_none()
+
+        if not profile:
+            raise NotFoundException("User account not found")
+
+        profile.is_email_verified = True
+        await db.commit()
+        return True

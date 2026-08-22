@@ -25,7 +25,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requireAdmin?: boole
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center text-xs font-semibold">
-        Initializing Dayflow AI Session...
+        Initializing DayFlow AI…
       </div>
     );
   }

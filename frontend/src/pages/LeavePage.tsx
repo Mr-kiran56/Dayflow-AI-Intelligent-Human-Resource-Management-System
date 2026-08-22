@@ -46,6 +46,20 @@ export const LeavePage: React.FC = () => {
     loadLeaveData();
   }, []);
 
+  // Fallback: derive leave types directly from user balances if global types fetch comes back empty
+  const availableLeaveTypes =
+    leaveTypes.length > 0
+      ? leaveTypes
+      : balances
+          .map((b) => b.leave_type)
+          .filter((lt): lt is LeaveType => Boolean(lt));
+
+  useEffect(() => {
+    if (showModal && availableLeaveTypes.length > 0 && !selectedType) {
+      setSelectedType(availableLeaveTypes[0].id);
+    }
+  }, [showModal, availableLeaveTypes, selectedType]);
+
   const handleCreateRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
@@ -94,7 +108,7 @@ export const LeavePage: React.FC = () => {
 
         <button
           onClick={() => setShowModal(true)}
-          className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Request Time Off</span>
@@ -124,7 +138,7 @@ export const LeavePage: React.FC = () => {
       </div>
 
       {/* What-If Leave Simulator */}
-      <LeaveSimulator leaveTypes={leaveTypes} />
+      <LeaveSimulator leaveTypes={availableLeaveTypes} />
 
       {/* Submitted Leave Requests Table */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-subtle">
@@ -188,8 +202,8 @@ export const LeavePage: React.FC = () => {
 
       {/* Time-Off Request Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-floating border border-slate-200 space-y-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-floating border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
             <h3 className="text-base font-bold text-slate-900">Request Time Off</h3>
 
             {formError && (
@@ -200,16 +214,18 @@ export const LeavePage: React.FC = () => {
 
             <form onSubmit={handleCreateRequest} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Leave Type</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Leave Type</label>
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
                   required
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-600"
+                  className="w-full p-3 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-semibold outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 shadow-xs cursor-pointer"
                 >
-                  <option value="">Select type</option>
-                  {leaveTypes.map((lt) => (
-                    <option key={lt.id} value={lt.id}>
+                  <option value="" className="text-slate-400 bg-white font-normal">
+                    Select leave type...
+                  </option>
+                  {availableLeaveTypes.map((lt) => (
+                    <option key={lt.id} value={lt.id} className="text-slate-900 bg-white font-semibold py-1">
                       {lt.name} ({lt.is_paid ? 'Paid' : 'Unpaid'})
                     </option>
                   ))}
@@ -218,35 +234,35 @@ export const LeavePage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Start Date</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Start Date</label>
                   <input
                     type="date"
                     required
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-600"
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-semibold outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 shadow-xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">End Date</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">End Date</label>
                   <input
                     type="date"
                     required
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-600"
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-semibold outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 shadow-xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Remarks / Reason</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Remarks / Reason</label>
                 <textarea
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
                   placeholder="e.g. Family vacation"
                   rows={2}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-600"
+                  className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-medium outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 shadow-xs"
                 />
               </div>
 
@@ -254,14 +270,14 @@ export const LeavePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm"
+                  disabled={submitting || !selectedType}
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all"
                 >
                   {submitting ? 'Submitting...' : 'Submit Request'}
                 </button>

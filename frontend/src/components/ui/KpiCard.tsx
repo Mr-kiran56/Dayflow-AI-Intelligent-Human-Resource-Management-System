@@ -26,7 +26,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   return (
     <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-subtle hover:shadow-card transition-all">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{title}</span>
+        <span className="text-sm font-semibold uppercase tracking-wider text-slate-500">{title}</span>
         <div className={`p-2.5 rounded-lg ${iconBg} ${iconColor}`}>
           <Icon className="w-5 h-5" />
         </div>
@@ -43,7 +43,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
           </span>
         )}
       </div>
-      {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+      {subtitle && <p className="mt-1.5 text-sm text-slate-500">{subtitle}</p>}
     </div>
   );
 };

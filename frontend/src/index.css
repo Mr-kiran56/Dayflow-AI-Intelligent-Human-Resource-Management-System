@@ -10,7 +10,11 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased selection:bg-brand-500 selection:text-white;
+    @apply bg-slate-50 text-slate-900 text-sm font-sans antialiased selection:bg-brand-500 selection:text-white;
+  }
+
+  h1, h2, h3 {
+    @apply tracking-tight;
   }
 }
 

@@ -42,6 +42,7 @@ class UserProfileSummary(BaseModel):
     department_id: Optional[uuid.UUID] = None
     job_title: Optional[str] = None
     is_active: bool
+    is_email_verified: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

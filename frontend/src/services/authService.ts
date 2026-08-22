@@ -33,6 +33,10 @@ export const authService = {
     return res.data;
   },
 
+  async verifyEmail(email: string): Promise<void> {
+    await api.post(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+  },
+
   async getMe(): Promise<UserProfile> {
     const res: any = await api.get('/auth/me');
     return res.data;

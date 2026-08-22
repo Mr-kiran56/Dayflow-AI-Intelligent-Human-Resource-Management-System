@@ -111,5 +111,9 @@ class PineconeService:
             "query": user_query,
             "answer": answer,
             "matched_policies": matching_policies,
+            "policy_title": matching_policies[0]["title"] if matching_policies else None,
+            "policy_sources": [
+                {"title": p["title"], "category": p["category"]} for p in matching_policies
+            ],
             "vector_index": "dayflow-policies",
         }
