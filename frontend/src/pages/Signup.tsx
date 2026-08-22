@@ -17,6 +17,7 @@ export const Signup: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationModalOpen, setVerificationModalOpen] = useState(false);
+  const [showChecklistPopover, setShowChecklistPopover] = useState(false);
 
   const { signup, loading } = useAuth();
   const navigate = useNavigate();
@@ -101,7 +102,7 @@ export const Signup: React.FC = () => {
       <div className="fixed top-1/4 right-10 w-[550px] h-[550px] bg-purple-500/35 rounded-full blur-[95px] pointer-events-none animate-pulse" />
       <div className="fixed bottom-1/4 left-10 w-[500px] h-[500px] bg-emerald-500/35 rounded-full blur-[90px] pointer-events-none" />
 
-      {/* Google Material 3 Centered Card Container */}
+      {/* Google Material 3 Fixed Centered Card Container */}
       <div className="w-full max-w-md relative z-10 my-4">
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.45)] border border-white/40 overflow-hidden p-6 sm:p-8">
           
@@ -115,7 +116,7 @@ export const Signup: React.FC = () => {
 
           <div>
             {error && (
-              <div className="mb-3.5 p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-medium">
+              <div className="mb-3.5 p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-medium animate-in fade-in">
                 {error}
               </div>
             )}
@@ -197,72 +198,82 @@ export const Signup: React.FC = () => {
                 />
               </div>
 
-              {/* Password & Confirm Password Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Password</label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                    <input
-                      type="password"
-                      required
-                      disabled={isBusy}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Min 8 chars"
-                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1a73e8]/30 focus:border-[#1a73e8] focus:bg-white transition-all font-medium disabled:opacity-60"
-                    />
+              {/* Password & Confirm Password Grid with Absolute Floating Popover Checklist */}
+              <div className="relative">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                      <input
+                        type="password"
+                        required
+                        disabled={isBusy}
+                        value={password}
+                        onFocus={() => setShowChecklistPopover(true)}
+                        onBlur={() => setShowChecklistPopover(false)}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          setShowChecklistPopover(true);
+                        }}
+                        placeholder="Min 8 chars"
+                        className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1a73e8]/30 focus:border-[#1a73e8] focus:bg-white transition-all font-medium disabled:opacity-60"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Confirm Password</label>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                      <input
+                        type="password"
+                        required
+                        disabled={isBusy}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Re-enter"
+                        className={`w-full pl-10 pr-3 py-2.5 bg-slate-50 border rounded-2xl text-xs text-slate-900 focus:outline-none transition-all font-medium disabled:opacity-60 ${
+                          confirmPassword && !passwordsMatch ? 'border-rose-400 focus:ring-rose-500/20' : 'border-slate-200 focus:ring-[#1a73e8]/30 focus:border-[#1a73e8]'
+                        }`}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Confirm Password</label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                    <input
-                      type="password"
-                      required
-                      disabled={isBusy}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Re-enter"
-                      className={`w-full pl-10 pr-3 py-2.5 bg-slate-50 border rounded-2xl text-xs text-slate-900 focus:outline-none transition-all font-medium disabled:opacity-60 ${
-                        confirmPassword && !passwordsMatch ? 'border-rose-400 focus:ring-rose-500/20' : 'border-slate-200 focus:ring-[#1a73e8]/30 focus:border-[#1a73e8]'
-                      }`}
-                    />
+                {/* Floating Overlay Hover Popover - Does NOT Shift Card Layout */}
+                {(showChecklistPopover || (password && !isPasswordValid)) && (
+                  <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/90 shadow-[0_15px_35px_rgba(0,0,0,0.18)] text-[11px] space-y-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <p className="font-bold text-slate-800 mb-1 flex items-center justify-between">
+                      <span>Security Policy Checklist:</span>
+                      {isPasswordValid && <span className="text-[#34A853] text-[10px]">Passed ✓</span>}
+                    </p>
+                    <div className="grid grid-cols-2 gap-1 text-slate-600">
+                      <span className={`flex items-center gap-1 ${hasMinLength ? 'text-[#34A853] font-bold' : ''}`}>
+                        {hasMinLength ? <CheckCircle2 className="w-3 h-3 text-[#34A853]" /> : <AlertCircle className="w-3 h-3 text-slate-400" />}
+                        8+ Characters
+                      </span>
+                      <span className={`flex items-center gap-1 ${hasUppercase ? 'text-[#34A853] font-bold' : ''}`}>
+                        {hasUppercase ? <CheckCircle2 className="w-3 h-3 text-[#34A853]" /> : <AlertCircle className="w-3 h-3 text-slate-400" />}
+                        1 Uppercase (A-Z)
+                      </span>
+                      <span className={`flex items-center gap-1 ${hasNumber ? 'text-[#34A853] font-bold' : ''}`}>
+                        {hasNumber ? <CheckCircle2 className="w-3 h-3 text-[#34A853]" /> : <AlertCircle className="w-3 h-3 text-slate-400" />}
+                        1 Number (0-9)
+                      </span>
+                      <span className={`flex items-center gap-1 ${hasSpecial ? 'text-[#34A853] font-bold' : ''}`}>
+                        {hasSpecial ? <CheckCircle2 className="w-3 h-3 text-[#34A853]" /> : <AlertCircle className="w-3 h-3 text-slate-400" />}
+                        1 Symbol (!@#$)
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
-
-              {/* Password Security Rules Checklist */}
-              {password && (
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-[11px] space-y-1">
-                  <p className="font-semibold text-slate-700 mb-1">Security Policy Checklist:</p>
-                  <div className="grid grid-cols-2 gap-1 text-slate-600">
-                    <span className={`flex items-center gap-1 ${hasMinLength ? 'text-[#34A853] font-semibold' : ''}`}>
-                      {hasMinLength ? <CheckCircle2 className="w-3 h-3 text-[#34A853]" /> : <AlertCircle className="w-3 h-3 text-slate-400" />}
-                      8+ Characters
-                    </span>
-                    <span className={`flex items-center gap-1 ${hasUppercase ? 'text-[#34A853] font-semibold' : ''}`}>
-                      {hasUppercase ? <CheckCircle2 className="w-3 h-3 text-[#34A853]" /> : <AlertCircle className="w-3 h-3 text-slate-400" />}
-                      1 Uppercase (A-Z)
-                    </span>
-                    <span className={`flex items-center gap-1 ${hasNumber ? 'text-[#34A853] font-semibold' : ''}`}>
-                      {hasNumber ? <CheckCircle2 className="w-3 h-3 text-[#34A853]" /> : <AlertCircle className="w-3 h-3 text-slate-400" />}
-                      1 Number (0-9)
-                    </span>
-                    <span className={`flex items-center gap-1 ${hasSpecial ? 'text-[#34A853] font-semibold' : ''}`}>
-                      {hasSpecial ? <CheckCircle2 className="w-3 h-3 text-[#34A853]" /> : <AlertCircle className="w-3 h-3 text-slate-400" />}
-                      1 Symbol (!@#$)
-                    </span>
-                  </div>
-                </div>
-              )}
 
               <button
                 type="submit"
                 disabled={isBusy || !isPasswordValid || !passwordsMatch}
-                className="w-full py-3 bg-[#1a73e8] hover:bg-[#1557b0] active:bg-[#174ea6] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs rounded-full shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 mt-3"
+                className="w-full py-3 bg-[#1a73e8] hover:bg-[#1557b0] active:bg-[#174ea6] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs rounded-full shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 mt-4"
               >
                 {isBusy ? (
                   <>
@@ -297,49 +308,30 @@ export const Signup: React.FC = () => {
             </div>
 
             <div className="text-center space-y-1">
-              <h3 className="text-lg font-bold text-slate-900">Verification Link Sent</h3>
+              <h3 className="text-lg font-bold text-slate-900">Email Verification Required</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                An activation link has been sent to <span className="font-bold text-[#1a73e8]">{email}</span>. You must verify your email before logging in.
+                An activation link has been generated for <span className="font-bold text-[#1a73e8]">{email}</span>. You must verify your email before sign in is granted.
               </p>
             </div>
 
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 flex items-center gap-2 font-medium">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>Unverified accounts will be blocked from logging in.</span>
+              <span>Redirection disabled until email verification succeeds.</span>
             </div>
 
-            <div className="space-y-2 pt-1">
+            <div className="pt-2">
               <button
                 type="button"
-                disabled={isVerifying}
-                onClick={handleVerifyEmail}
-                className="w-full py-3 bg-[#34A853] hover:bg-[#2d9247] text-white font-bold text-xs rounded-full transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60"
-              >
-                {isVerifying ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                    <span>Verifying Email...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Verify Email & Proceed to Sign In</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                disabled={isVerifying}
                 onClick={() => {
                   setVerificationModalOpen(false);
                   navigate('/login', {
-                    state: { info: `Account created for ${email}. Email verification is pending. Please verify your email to log in.` },
+                    state: { info: `Account created for ${email}. Please open your email inbox and click the verification link before logging in.` },
                   });
                 }}
-                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-full transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-3 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold text-xs rounded-full transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Go to Sign In (Verification Pending)</span>
+                <span>Proceed to Sign In</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
